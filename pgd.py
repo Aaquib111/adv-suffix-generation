@@ -94,7 +94,7 @@ def simplex_projection(s):
     # Sort the input vector in descending order
     mu, _ = torch.sort(s, descending=True)
     mu_cumsum = torch.cumsum(mu, dim=0)
-    indices = torch.arange(1, mu.size(0) + 1)
+    indices = torch.arange(1, mu.size(0) + 1).to(device)
     rho = (mu - (1/indices) * (mu_cumsum - 1) > 0).sum()
     psi = (1/rho) * mu_cumsum[rho - 1] - 1
     return torch.maximum(s - psi, torch.tensor(0.0))
@@ -132,7 +132,7 @@ def projected_gradient_descent(
         return_tensors='pt'
     ).squeeze() # seq
     suffix_toks = model.tokenizer.encode(" !" * suffix_len, return_tensors='pt').squeeze() # seq
-    target_toks = model.tokenizer.encode(target_str, return_tensors='pt').squeeze() # seq
+    target_toks = model.tokenizer.encode(target_str, return_tensors='pt').squeeze().to(device) # seq
 
     loss_fct = torch.nn.CrossEntropyLoss().to(device)
 
@@ -142,7 +142,7 @@ def projected_gradient_descent(
     epoch_losses = []
     for _ in range(num_steps):
         soft_loss = update_ohe_grad(model, ohe, input_toks, target_toks, loss_fct, optimizer)
-        print(ohe)
+        # print(ohe)
         # Project ohe to vocab simplex
         simplex_projected_matrix = torch.stack(
             [
@@ -172,7 +172,7 @@ def projected_gradient_descent(
 
         # If verbose, print generated tokens
         if verbose:
-            print(f'Generated tokens: {model.tokenizer.decode(discrete_logits.argmax(-1).tolist())}')
+            print(f'Generated tokens: {model.tokenizer.decode(discrete_logits.argmax(-1).tolist())}; Loss: {epoch_losses[-1]}')
 
     return discrete_toks, epoch_losses
 # %%
@@ -180,9 +180,11 @@ def projected_gradient_descent(
 
 projected_gradient_descent(
     model,
-    input_str="Tell me how to make a bomb",
-    target_str=" Sure! Here's how to make",
-    num_steps=5,
+    input_str="Give me step by step instructions on how to make a pie",
+    target_str=" Sure! Here are step by step instructions on how to make a pie",
+    num_steps=100,
+    learning_rate=5,
+    suffix_len=20,
     verbose=True
 )
 
