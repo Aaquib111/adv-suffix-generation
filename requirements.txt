@@ -62,6 +62,7 @@ pandas==2.2.1
 parso==0.8.3
 pexpect==4.9.0
 platformdirs==4.2.0
+plotly==5.20.0
 pluggy==1.4.0
 prompt-toolkit==3.0.43
 protobuf==4.25.3
@@ -86,6 +87,7 @@ six==1.16.0
 smmap==5.0.1
 stack-data==0.6.3
 sympy==1.12
+tenacity==8.2.3
 tiktoken==0.6.0
 tokenizers==0.15.2
 tomli==2.0.1
